@@ -1,12 +1,12 @@
 js = {
 	log:"",
 	base:"/sdcard/mcpe",
-	chat: false,
+	url:"http://raw.githubusercontent.com/dot-sch/mcpe/master/js_hacker.js",
 	load: function(file,log)
 	{
 	  var nl = "\n";
 	  file = this.fn(file);
-	  var r = new java.io.BufferedReader(new java.io.FileReader(file));
+	  var r = new java.io.BufferedReader(this.reader(file));
 	  var expr = "";
 	  while (r.ready())
 	    expr += r.readLine() + nl;
@@ -18,11 +18,20 @@ js = {
 	},
 	fn: function(file)
 	{
+		 if (file.startsWith("http://"))
+		   return file;
 		 if (!file.startsWith("/"))
 		   file = this.base+"/"+file;
 		 if (!file.toLowerCase().endsWith(".js"))
 		   file = file+".js";
 		 return file;
+	},
+	reader: function(url_or_file)
+	{
+		 if (url_or_file.startsWith("http://"))
+		   return new java.io.InputStreamReader(new java.net.URL(url_or_file).openStream());
+		 else
+		   return new java.io.FileReader(url_or_file);
 	}
 };
 
@@ -65,6 +74,6 @@ procCmd = function(command)
   }
   else if (cmd.length==1 && cmd[0]=="reload")
   {
-    js.load("/sdcard/Download/js_hacker.js",false);
+    js.load("/sdcard/Download/apa.js",false);
   }
 }
