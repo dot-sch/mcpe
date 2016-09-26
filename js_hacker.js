@@ -1,7 +1,7 @@
 js = {
-	log:"",
-	base:"/sdcard/mcpe",
-	url:"http://raw.githubusercontent.com/dot-sch/mcpe/master/js_hacker.js",
+	log: "",
+	base: "/sdcard/mcpe",
+	url_base: "http://raw.githubusercontent.com/dot-sch/mcpe/master",
 	load: function(file,log)
 	{
 	  var nl = "\n";
@@ -32,6 +32,14 @@ js = {
 		   return new java.io.InputStreamReader(new java.net.URL(url_or_file).openStream());
 		 else
 		   return new java.io.FileReader(url_or_file);
+	},
+	outputstream: function(file)
+	{
+	  f = new java.io.File(file);
+	  p = f.getParentFile();
+	  if (!p.exists())
+	    p.mkdirs();
+	  return new java.io.FileOutputStream(f);  
 	}
 };
 
@@ -54,7 +62,7 @@ procCmd = function(command)
   else if (cmd.length>1 && cmd[0]=="save")
   {
     var file = js.fn(cmd[1]);
-    var p = new java.io.PrintStream(new java.io.FileOutputStream(file));
+    var p = new java.io.PrintStream(js.outputstream(file));
     if (cmd.length>2)
     {
       for (i=2; i<cmd.length; i++)
@@ -74,6 +82,10 @@ procCmd = function(command)
   }
   else if (cmd.length==1 && cmd[0]=="reload")
   {
-    js.load("/sdcard/Download/apa.js",false);
+    js.load("js_hacker.js",false);
+  }
+  else if (cmd.length==1 && cmd[0]=="dl")
+  {
+    js.load(js.url_base+"/js_hacker.js",false);
   }
 }
