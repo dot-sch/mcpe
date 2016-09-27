@@ -47,17 +47,21 @@ procCmd = function(command)
 {
   var nl = "\n";
   var cmd =command.split(" "); 
+  try
+  {
   if (cmd.length>1 && (cmd[0]=="js" || cmd[0]=="jp" || cmd[0]=="j"))
   {
     var expr = command.substring(cmd[0].length+1, command.lenght);
+
+	var res = eval(expr);
+	if (cmd[0]=="j") 
+	  clientMessage("§b"+expr)
+	else if (res===undefined)
+	  clientMessage("§cundefined");
+	else
+	  clientMessage("§a"+res);
     js.log += expr + nl;
-    var res = eval(expr);
-    if (cmd[0]=="j") 
-      clientMessage("§b"+expr)
-    else if (res===undefined)
-    {}
-    else
-      clientMessage("§c"+res);
+   
   }
   else if (cmd.length>1 && cmd[0]=="save")
   {
@@ -87,5 +91,10 @@ procCmd = function(command)
   else if (cmd.length==1 && cmd[0]=="dl")
   {
     js.load(js.url_base+"/js_hacker.js",false);
+  }
+  }
+  catch (err)
+  {
+    clientMessage("§c#error: "+err.message); 
   }
 }
