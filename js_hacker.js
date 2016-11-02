@@ -1,22 +1,23 @@
 js = {
+	version: "2016-11-02",
 	log: "",
 	base: "/sdcard/mcpe",
 	url_base: "http://raw.githubusercontent.com/dot-sch/mcpe/master",
 	load: function(file, log)
 	{
-	  var nl = "\n";
-	  file = this.fn(file);
-	  var r = new java.io.BufferedReader(this.reader(file));
-	  var expr = "";
-	  while (r.ready())
-	    expr += r.readLine() + nl;
-	  r.close();
-	  if (log)
-	    js.log += expr;
-	  try
-	  {
-	    eval(expr);
-	    clientMessage("Loaded "+file);
+      try
+      {
+	    var nl = "\n";
+        file = this.fn(file);
+        var r = new java.io.BufferedReader(this.reader(file));
+        var expr = "";
+        while (r.ready())
+          expr += r.readLine() + nl;
+        r.close();
+        if (log)
+          js.log += expr;
+        eval(expr);
+        clientMessage("Loaded "+file);
 	  }
 	  catch (err)
 	  {
@@ -50,19 +51,22 @@ js = {
 	},
 	toJS: function(obj)
 	{
-   funcs = [];
-   repl = function(k, v) 
-   {
-     if (typeof(v) === "function")
-       return "#Func"+(funcs.push(v)-1)+"#";
-     else 
-       return v;
-   }
-	  out = JSON.stringify(obj, repl);
-	  for (i=funcs.length; i-->0;)
-	    out = out.replace("\"#Func"+i+"#\"", funcs[i].toString().trim());
-	  return out;
-	}
+      funcs = [];
+      repl = function(k, v) 
+      {
+        str = String(v);
+        if (str.startsWith("[JavaClass ") || str.startsWith("[JavaPackage "))
+          return str
+        else if (typeof(v) === "function")
+          return "#Func"+(funcs.push(v)-1)+"#";
+        else 
+          return v;
+      }
+      out = JSON.stringify(obj, repl);
+      for (i=funcs.length; i-->0;)
+        out = out.replace("\"#Func"+i+"#\"", funcs[i].toString().trim());
+      return out;
+    }
 };
 
 procCmd = function(command)
@@ -80,7 +84,9 @@ procCmd = function(command)
       else if (res===undefined)
 	    clientMessage("§cundefined");
 	  else
-	    clientMessage("§a"+res);
+	  {
+	    clientMessage("§a"+js.toJS(res));
+	  }
       js.log += expr + nl;
 	}
 	catch (err)
