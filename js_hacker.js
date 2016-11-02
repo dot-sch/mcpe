@@ -2,7 +2,7 @@ js = {
 	log: "",
 	base: "/sdcard/mcpe",
 	url_base: "http://raw.githubusercontent.com/dot-sch/mcpe/master",
-	load: function(file,log)
+	load: function(file, log)
 	{
 	  var nl = "\n";
 	  file = this.fn(file);
@@ -13,25 +13,32 @@ js = {
 	  r.close();
 	  if (log)
 	    js.log += expr;
-	  eval(expr);
-	  clientMessage("Loaded "+file);
+	  try
+	  {
+	    eval(expr);
+	    clientMessage("Loaded "+file);
+	  }
+	  catch (err)
+	  {
+		clientMessage("§c#error loading "+file+": "+err.message);
+	  }
 	},
 	fn: function(file)
 	{
-		 if (file.startsWith("http://"))
-		   return file;
-		 if (!file.startsWith("/"))
-		   file = this.base+"/"+file;
-		 if (!file.toLowerCase().endsWith(".js"))
-		   file = file+".js";
-		 return file;
+      if (file.startsWith("http://"))
+        return file;
+      if (!file.startsWith("/"))
+        file = this.base+"/"+file;
+      if (!file.toLowerCase().endsWith(".js"))
+        file = file+".js";
+      return file;
 	},
 	reader: function(url_or_file)
 	{
-		 if (url_or_file.startsWith("http://"))
-		   return new java.io.InputStreamReader(new java.net.URL(url_or_file).openStream());
-		 else
-		   return new java.io.FileReader(url_or_file);
+      if (url_or_file.startsWith("http://"))
+        return new java.io.InputStreamReader(new java.net.URL(url_or_file).openStream());
+      else
+        return new java.io.FileReader(url_or_file);
 	},
 	outputstream: function(file)
 	{
@@ -40,6 +47,21 @@ js = {
 	  if (!p.exists())
 	    p.mkdirs();
 	  return new java.io.FileOutputStream(f);  
+	},
+	toJS: function(obj)
+	{
+   funcs = [];
+   repl = function(k, v) 
+   {
+     if (typeof(v) === "function")
+       return "#Func"+(funcs.push(v)-1)+"#";
+     else 
+       return v;
+   }
+	  out = JSON.stringify(obj, repl);
+	  for (i=funcs.length; i-->0;)
+	    out = out.replace("\"#Func"+i+"#\"", funcs[i].toString().trim());
+	  return out;
 	}
 };
 
@@ -47,21 +69,24 @@ procCmd = function(command)
 {
   var nl = "\n";
   var cmd =command.split(" "); 
-  try
-  {
   if (cmd.length>1 && (cmd[0]=="js" || cmd[0]=="jp" || cmd[0]=="j"))
   {
     var expr = command.substring(cmd[0].length+1, command.lenght);
-
-	var res = eval(expr);
-	if (cmd[0]=="j") 
-	  clientMessage("§b"+expr)
-	else if (res===undefined)
-	  clientMessage("§cundefined");
-	else
-	  clientMessage("§a"+res);
-    js.log += expr + nl;
-   
+    try
+    {
+	  var res = eval(expr);
+	  if (cmd[0]=="j") 
+	    clientMessage("§b"+expr)
+      else if (res===undefined)
+	    clientMessage("§cundefined");
+	  else
+	    clientMessage("§a"+res);
+      js.log += expr + nl;
+	}
+	catch (err)
+	{
+      clientMessage("§c#error: "+err.message); 
+	}
   }
   else if (cmd.length>1 && cmd[0]=="save")
   {
@@ -69,8 +94,17 @@ procCmd = function(command)
     var p = new java.io.PrintStream(js.outputstream(file));
     if (cmd.length>2)
     {
-      for (i=2; i<cmd.length; i++)
-        p.println(cmd[i]+" = "+eval(cmd[i])+";");
+      for (j=2; j<cmd.length; j++)
+      {
+        try
+		{
+          p.println(cmd[j]+" = "+js.toJS(eval(cmd[j]))+";");
+        }
+        catch (err)
+        {
+          clientMessage("§c#error: "+err.message);
+        }
+      }
     }
     else
     {
@@ -91,10 +125,5 @@ procCmd = function(command)
   else if (cmd.length==1 && cmd[0]=="dl")
   {
     js.load(js.url_base+"/js_hacker.js",false);
-  }
-  }
-  catch (err)
-  {
-    clientMessage("§c#error: "+err.message); 
   }
 }
