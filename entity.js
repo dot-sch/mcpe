@@ -15,13 +15,13 @@ if (true)
 	}
 }
 
-kill = function()
+entity._kill = function(what)
 {
 	killed = 0;
 	for (i in Entity.getAll())
 	{
 		tId = Entity.getEntityTypeId();
-		if (entity.bad.contains(tId))
+		if (what.contains(tId))
 		{
 			Entity.remove(i);
 			killed++;
@@ -29,3 +29,7 @@ kill = function()
 	}
 	return killed;
 }
+
+killBad = function() { return entity._kill(entity.bad); }
+killGood = function() { return entity._kill(entity.good); }
+kill = killBad;
