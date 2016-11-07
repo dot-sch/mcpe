@@ -1,7 +1,7 @@
 js = {
-	version: "2016-11-02",
+	version: "2016-11-05",
 	log: "",
-	base: "/sdcard/mcpe",
+	base: android.os.Environment.getExternalStorageDirectory()+"/mcpe",
 	url_base: "http://raw.githubusercontent.com/dot-sch/mcpe/master",
 	load: function(file, log)
 	{
@@ -26,12 +26,12 @@ js = {
 	},
 	fn: function(file)
 	{
+      if (!file.toLowerCase().endsWith(".js"))
+        file = file+".js";
       if (file.startsWith("http://"))
         return file;
       if (!file.startsWith("/"))
         file = this.base+"/"+file;
-      if (!file.toLowerCase().endsWith(".js"))
-        file = file+".js";
       return file;
 	},
 	reader: function(url_or_file)
@@ -68,6 +68,8 @@ js = {
       return out;
     }
 };
+
+js.cm = js.cm ? js.cm : clientMessage;
 
 procCmd = function(command)
 {
@@ -127,9 +129,11 @@ procCmd = function(command)
   else if (cmd.length==1 && cmd[0]=="reload")
   {
     js.load("js_hacker.js",false);
+    clientMessage("version: "+js.version);
   }
-  else if (cmd.length==1 && cmd[0]=="dl")
+  else if (cmd[0]=="dl")
   {
-    js.load(js.url_base+"/js_hacker.js",false);
+    sc = cmd.length==1 ? "js_hacker.js" : cmd[1];
+    js.load(js.url_base+"/"+sc,false);
   }
 }
