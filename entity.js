@@ -14,3 +14,18 @@ if (true)
 			entity.bad.add(id);
 	}
 }
+
+kill = function()
+{
+	killed = 0;
+	for (i in Entity.getAll())
+	{
+		tId = Entity.getEntityTypeId();
+		if (entity.bad.contains(tId))
+		{
+			Entity.remove(i);
+			killed++;
+		}
+	}
+	return killed;
+}
